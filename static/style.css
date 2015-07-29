@@ -1,0 +1,39 @@
+* {
+	font-family: "Arial", sans-serif;
+}
+
+html {
+	background: #def;
+	margin: 0;
+	padding: 0;
+}
+
+body{
+	background: white;
+	width: 800px;
+	margin: 0 auto;
+	padding: 30px;
+	border-left: 1px solid #06a;
+	border-right: 1px solid #06a;
+	padding-bottom: 200px;
+}
+
+.entry {
+	margin-bottom: 60px;
+}
+
+h1, h2, h3, h4, h5, a {
+	color: #06a;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+.caption {
+	background: #def;
+	padding: 8px;
+	border-radius: 4px;
+	margin: 10px 0;
+}
