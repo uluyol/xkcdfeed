@@ -1,6 +1,7 @@
-package app
+package main
 
 import (
+	"context"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -12,9 +13,10 @@ import (
 	"regexp"
 	"time"
 
-	"appengine"
-	"appengine/memcache"
-	"appengine/urlfetch"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/memcache"
+	"google.golang.org/appengine/urlfetch"
 )
 
 type Link struct {
@@ -57,12 +59,13 @@ func (e *Entry) AltText() string {
 	return s[5 : len(s)-1]
 }
 
-func init() {
+func main() {
 	http.HandleFunc("/atom.xml", atomHandler)
 	http.HandleFunc("/", mainHandler)
+	appengine.Main()
 }
 
-func getUpstreamAtom(ctx appengine.Context) (*Feed, error) {
+func getUpstreamAtom(ctx context.Context) (*Feed, error) {
 	client := urlfetch.Client(ctx)
 	resp, err := client.Get("https://xkcd.com/atom.xml")
 	if err != nil {
@@ -86,10 +89,10 @@ func getUpstreamAtom(ctx appengine.Context) (*Feed, error) {
 
 const atomKey = "/xkcd.atom"
 
-func cachingGetUpstreamAtom(ctx appengine.Context) (*Feed, error) {
+func cachingGetUpstreamAtom(ctx context.Context) (*Feed, error) {
 	item, err := memcache.Get(ctx, atomKey)
 	if err != nil {
-		ctx.Infof("making request to xkcd.com")
+		log.Infof(ctx, "making request to xkcd.com")
 		feed, err := getUpstreamAtom(ctx)
 		if err != nil {
 			return nil, err
@@ -104,7 +107,7 @@ func cachingGetUpstreamAtom(ctx appengine.Context) (*Feed, error) {
 		}
 		return feed, nil
 	}
-	ctx.Infof("found feed in cache")
+	log.Infof(ctx, "found feed in cache")
 	var feed Feed
 	if err := xml.Unmarshal(item.Value, &feed); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal cached feed: %v", err)
